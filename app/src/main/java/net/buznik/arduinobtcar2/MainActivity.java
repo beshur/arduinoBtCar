@@ -6,10 +6,16 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+import android.content.SharedPreferences;
+import static android.content.Context.MODE_PRIVATE;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -59,6 +65,10 @@ class TouchBinder {
 
 public class MainActivity extends AppCompatActivity {
     private final String DEVICE_ADDRESS = "98:D3:11:FD:22:12"; //MAC Address of Bluetooth Module
+    private final String ADDRESSS_KEY = "BT_MAC";
+    private static final String TAG = "MainActivity";
+
+    private String device_address;
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
     private BluetoothDevice device;
@@ -67,8 +77,10 @@ public class MainActivity extends AppCompatActivity {
     private TouchBinder touchBinderInstance = new TouchBinder();
 
     Button forward_btn, forward_left_btn, forward_right_btn, reverse_btn, reverse_left_btn, reverse_right_btn, bluetooth_connect_btn;
+    EditText edit_mac_input;
 
     String command; //string variable that will store value to be transmitted to the bluetooth module
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +93,11 @@ public class MainActivity extends AppCompatActivity {
         forward_right_btn = (Button) findViewById(R.id.forward_right_btn);
         reverse_btn = (Button) findViewById(R.id.reverse_btn);
         bluetooth_connect_btn = (Button) findViewById(R.id.bluetooth_connect_btn);
+        edit_mac_input = (EditText) findViewById(R.id.editMAC);
+
+        sharedPreferences = getPreferences(MODE_PRIVATE);
+
+        device_address = sharedPreferences.getString(ADDRESSS_KEY, DEVICE_ADDRESS);
 
         //OnTouchListener code for the forward button (button long press)
         forward_btn.setOnTouchListener(new View.OnTouchListener() {
@@ -113,6 +130,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return touchBinderInstance.handler(v, event, "R");
+            }
+        });
+
+
+        edit_mac_input.setText(device_address);
+        edit_mac_input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
+            }
+
+            @Override
+            public void afterTextChanged(final Editable s) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String address = "" + edit_mac_input.getText();
+                Log.d(TAG, "Address " + address);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(ADDRESSS_KEY, address);
+                editor.commit();
+
+                device_address = address;
             }
         });
 
@@ -174,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         {
             for(BluetoothDevice iterator : bondedDevices)
             {
-                if(iterator.getAddress().equals(DEVICE_ADDRESS))
+                if(iterator.getAddress().equals(device_address))
                 {
                     device = iterator;
                     found = true;
