@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -54,14 +55,33 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
-    <EditText
-        android:id="@+id/editMAC"
+    <Spinner
+        android:id="@+id/bt_devices_select"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bluetooth_connect_btn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="23dp" />
+
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="60dp"
-        android:text="MAC Addres" />
+        android:layout_above="@+id/bt_devices_select"
+        android:layout_alignStart="@+id/bt_devices_select"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="19dp"
+        android:text="@string/dropDownLabel" />
+
+    <ImageView
+        android:id="@+id/bt_connected_view"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignBottom="@+id/bt_devices_select"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="0dp"
+        app:srcCompat="@drawable/ic_bt_connected" />
+
 </RelativeLayout>

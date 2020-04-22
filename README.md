@@ -8,11 +8,11 @@ MAC address is editable inside the app. App tries to connect to device on start.
 
 It sends the commands on buttons clicks:
 
-- Forward - "U"
-- Backward - "D"
-- Left - "L"
-- Right - "R"
-- Stop - "S" - upon thumb up from the button
+- Forward - `U`
+- Backward - `D`
+- Left - `L`
+- Right - `R`
+- Stop - `S` - upon thumb up from the button
 
 ## Initial code
 

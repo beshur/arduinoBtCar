@@ -11,14 +11,19 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 import android.content.SharedPreferences;
 import static android.content.Context.MODE_PRIVATE;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
@@ -63,6 +68,36 @@ class TouchBinder {
 
 }
 
+class BT_Devices_List {
+    ArrayList<String> names;
+    ArrayList<String> macs;
+
+    BT_Devices_List() {
+        names  = new ArrayList<String>();
+        macs  = new ArrayList<String>();
+    }
+
+    public void addDevices(Set<BluetoothDevice> bondedDevices) {
+        for(BluetoothDevice iterator : bondedDevices) {
+            names.add(iterator.getName());
+            macs.add(iterator.getAddress());
+        }
+    }
+
+    public String getMacByIndex(int index) {
+        return macs.get(index);
+    }
+
+    public ArrayList<String> getNames() {
+        return names;
+    }
+
+    public int getSelectedIndex(String device_address) {
+        return macs.indexOf(device_address);
+    }
+
+}
+
 public class MainActivity extends AppCompatActivity {
     private final String DEVICE_ADDRESS = "98:D3:11:FD:22:12"; //MAC Address of Bluetooth Module
     private final String ADDRESSS_KEY = "BT_MAC";
@@ -77,8 +112,10 @@ public class MainActivity extends AppCompatActivity {
     private TouchBinder touchBinderInstance = new TouchBinder();
 
     Button forward_btn, forward_left_btn, forward_right_btn, reverse_btn, reverse_left_btn, reverse_right_btn, bluetooth_connect_btn;
-    EditText edit_mac_input;
+    Spinner bt_devices_select;
+    ImageView bt_connected_icon;
 
+    BT_Devices_List bt_devices_list;
     String command; //string variable that will store value to be transmitted to the bluetooth module
     SharedPreferences sharedPreferences;
 
@@ -93,11 +130,12 @@ public class MainActivity extends AppCompatActivity {
         forward_right_btn = (Button) findViewById(R.id.forward_right_btn);
         reverse_btn = (Button) findViewById(R.id.reverse_btn);
         bluetooth_connect_btn = (Button) findViewById(R.id.bluetooth_connect_btn);
-        edit_mac_input = (EditText) findViewById(R.id.editMAC);
+        bt_connected_icon = (ImageView)findViewById(R.id.bt_connected_view);
 
         sharedPreferences = getPreferences(MODE_PRIVATE);
-
         device_address = sharedPreferences.getString(ADDRESSS_KEY, DEVICE_ADDRESS);
+
+        bt_devices_list = new BT_Devices_List();
 
         //OnTouchListener code for the forward button (button long press)
         forward_btn.setOnTouchListener(new View.OnTouchListener() {
@@ -133,34 +171,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        bt_devices_select = (Spinner) findViewById(R.id.bt_devices_select);
 
-        edit_mac_input.setText(device_address);
-        edit_mac_input.addTextChangedListener(new TextWatcher() {
+        bt_devices_select.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
-            }
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                String mac = bt_devices_list.getMacByIndex(position);
+                Log.d(TAG, "onItemSelected mac" + mac);
 
-            @Override
-            public void afterTextChanged(final Editable s) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String address = "" + edit_mac_input.getText();
-                Log.d(TAG, "Address " + address);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(ADDRESSS_KEY, address);
+                editor.putString(ADDRESSS_KEY, mac);
                 editor.commit();
 
-                device_address = address;
+                device_address = mac;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
             }
         });
+
 
         //Button that connects the device to the bluetooth module when pressed
         bluetooth_connect_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if(BTinit())
                 {
                     BTconnect();
@@ -221,6 +257,13 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
             }
+
+            bt_devices_list.addDevices(bondedDevices);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, bt_devices_list.getNames());
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            bt_devices_select.setAdapter(adapter);
+            bt_devices_select.setSelection(bt_devices_list.getSelectedIndex(device_address));
+
         }
 
         return found;
@@ -244,16 +287,20 @@ public class MainActivity extends AppCompatActivity {
             connected = false;
         }
 
+        bt_connected_icon.setVisibility(View.INVISIBLE);
+
         if(connected)
         {
             try
             {
                 outputStream = socket.getOutputStream(); //gets the output stream of the socket
+                bt_connected_icon.setVisibility(View.VISIBLE);
             }
             catch(IOException e)
             {
                 e.printStackTrace();
             }
+        } else {
         }
 
         touchBinderInstance.setOutputStream(outputStream);

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">arduinoBtCar2</string>
+    <string name="dropDownLabel">Selected Bluetooth device:</string>
+    <string name="connectedIcon"></string>
 </resources>
