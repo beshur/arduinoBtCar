@@ -1,3 +1,5 @@
+![Android CI](https://github.com/beshur/arduinoBtCar/workflows/Android%20CI/badge.svg)
+
 # Arduino Bluetooth Controller
 
 A simple Android app to control your Bluetooth-enabled car.
