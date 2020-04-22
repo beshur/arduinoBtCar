@@ -1,4 +1,4 @@
-![Android CI](https://github.com/beshur/arduinoBtCar/workflows/Android%20CI/badge.svg)
+[![Android CI](https://github.com/beshur/arduinoBtCar/workflows/Android%20CI/badge.svg)](https://github.com/beshur/arduinoBtCar/actions?query=workflow%3A%22Android+CI%22)
 
 # Arduino Bluetooth Controller
 
