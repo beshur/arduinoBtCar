@@ -17,3 +17,7 @@ It sends the commands on buttons clicks:
 ## Initial code
 
 See [Android-Studio-code](https://github.com/BoldizsarZopcsak/Android-Studio-code)
+
+## Screenshot
+
+![Main Activity](./Screenshot.jpg)
