@@ -11,3 +11,7 @@ It sends the commands on buttons clicks:
 - Left - "L"
 - Right - "R"
 - Stop - "S" - upon thumb up from the button
+
+## Initial code
+
+See [https://github.com/BoldizsarZopcsak/Android-Studio-code](Android-Studio-code)
