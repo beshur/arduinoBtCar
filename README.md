@@ -14,4 +14,4 @@ It sends the commands on buttons clicks:
 
 ## Initial code
 
-See [https://github.com/BoldizsarZopcsak/Android-Studio-code](Android-Studio-code)
+See [Android-Studio-code](https://github.com/BoldizsarZopcsak/Android-Studio-code)
