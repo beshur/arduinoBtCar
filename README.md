@@ -4,20 +4,18 @@
 
 A simple Android app to control your Bluetooth-enabled car.
 
-MAC address is editable inside the app. App tries to connect to device on start.
+Paired devices are displayed in a select box. App tries to connect to device on start.
 
 It sends the commands on buttons clicks:
 
-- Forward - "U"
-- Backward - "D"
-- Left - "L"
-- Right - "R"
-- Stop - "S" - upon thumb up from the button
+- Forward - `U`
+- Backward - `D`
+- Left - `L`
+- Right - `R`
+- Stop - `S` - upon thumb up from the button
 
-## Initial code
+## Credits
 
-See [Android-Studio-code](https://github.com/BoldizsarZopcsak/Android-Studio-code)
+Initial code [Android-Studio-code](https://github.com/BoldizsarZopcsak/Android-Studio-code)
 
-## Screenshot
-
-![Main Activity](./Screenshot.jpg)
+Bluetooth icon [Bluetooth by Ilham Fitrotul Hayat from the Noun Project](https://thenounproject.com/search/?q=bluetooth&i=3283478)
