@@ -6,20 +6,18 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.content.SharedPreferences;
-import static android.content.Context.MODE_PRIVATE;
+
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,13 +25,32 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
+
+interface OnBrokenPipeListener {
+    void onBrokenPipe();
+}
+
 class TouchBinder {
     String command;
     private OutputStream outputStream;
+    private OnBrokenPipeListener listener;
+
+    public void setOnBrokenPipeListener(OnBrokenPipeListener listener) {
+        this.listener = listener;
+    }
 
     public void setOutputStream(OutputStream outputStreamArg) {
         outputStream = outputStreamArg;
     }
+
+    private void onException(IOException e) {
+        Log.d("TouchBinder", "exception: " + e.getMessage());
+        if(e.getMessage().contains("Broken pipe")){
+            if (listener != null) listener.onBrokenPipe();
+        }
+        e.printStackTrace();
+    }
+
 
     public boolean handler(View v, MotionEvent event, String boundCommand) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) //MotionEvent.ACTION_DOWN is when you hold a button down
@@ -46,7 +63,7 @@ class TouchBinder {
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                onException(e);
             }
         }
         else if(event.getAction() == MotionEvent.ACTION_UP) //MotionEvent.ACTION_UP is when you release a button
@@ -58,14 +75,12 @@ class TouchBinder {
             }
             catch(IOException e)
             {
-                e.printStackTrace();
+                onException(e);
             }
 
         }
-
         return false;
     }
-
 }
 
 class BT_Devices_List {
@@ -78,6 +93,8 @@ class BT_Devices_List {
     }
 
     public void addDevices(Set<BluetoothDevice> bondedDevices) {
+        names.clear();
+        macs.clear();
         for(BluetoothDevice iterator : bondedDevices) {
             names.add(iterator.getName());
             macs.add(iterator.getAddress());
@@ -95,10 +112,9 @@ class BT_Devices_List {
     public int getSelectedIndex(String device_address) {
         return macs.indexOf(device_address);
     }
-
 }
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnBrokenPipeListener {
     private final String DEVICE_ADDRESS = "98:D3:11:FD:22:12"; //MAC Address of Bluetooth Module
     private final String ADDRESSS_KEY = "BT_MAC";
     private static final String TAG = "MainActivity";
@@ -109,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private OutputStream outputStream;
-    private TouchBinder touchBinderInstance = new TouchBinder();
+    private TouchBinder touchBinderInstance;
 
     Button forward_btn, forward_left_btn, forward_right_btn, reverse_btn, reverse_left_btn, reverse_right_btn, bluetooth_connect_btn;
     Spinner bt_devices_select;
@@ -118,6 +134,13 @@ public class MainActivity extends AppCompatActivity {
     BT_Devices_List bt_devices_list;
     String command; //string variable that will store value to be transmitted to the bluetooth module
     SharedPreferences sharedPreferences;
+
+    @Override
+    public void onBrokenPipe() {
+        device = null;
+        Toast.makeText(getApplicationContext(), "Device disconnected", Toast.LENGTH_SHORT).show();
+        toggleConnectedIcon(false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +159,9 @@ public class MainActivity extends AppCompatActivity {
         device_address = sharedPreferences.getString(ADDRESSS_KEY, DEVICE_ADDRESS);
 
         bt_devices_list = new BT_Devices_List();
+
+        touchBinderInstance = new TouchBinder();
+        touchBinderInstance.setOnBrokenPipeListener(this);
 
         //OnTouchListener code for the forward button (button long press)
         forward_btn.setOnTouchListener(new View.OnTouchListener() {
@@ -209,8 +235,11 @@ public class MainActivity extends AppCompatActivity {
         {
             BTconnect();
         }
+    }
 
-
+    private void toggleConnectedIcon(boolean show) {
+        int state = show ? View.VISIBLE : View.INVISIBLE;
+        bt_connected_icon.setVisibility(state);
     }
 
     //Initializes bluetooth module
@@ -287,14 +316,14 @@ public class MainActivity extends AppCompatActivity {
             connected = false;
         }
 
-        bt_connected_icon.setVisibility(View.INVISIBLE);
+        toggleConnectedIcon(false);
 
         if(connected)
         {
             try
             {
                 outputStream = socket.getOutputStream(); //gets the output stream of the socket
-                bt_connected_icon.setVisibility(View.VISIBLE);
+                toggleConnectedIcon(true);
             }
             catch(IOException e)
             {

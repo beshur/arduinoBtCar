@@ -82,6 +82,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="0dp"
+        android:visibility="invisible"
         app:srcCompat="@drawable/ic_bt_connected" />
 
 </RelativeLayout>
