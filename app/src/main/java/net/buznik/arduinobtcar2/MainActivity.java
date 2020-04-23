@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -53,6 +54,9 @@ class TouchBinder {
 
 
     public boolean handler(View v, MotionEvent event, String boundCommand) {
+        if (outputStream == null) {
+            return false;
+        }
         if (event.getAction() == MotionEvent.ACTION_DOWN) //MotionEvent.ACTION_DOWN is when you hold a button down
         {
             command = boundCommand;
@@ -139,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnBrokenPipeListe
     public void onBrokenPipe() {
         device = null;
         Toast.makeText(getApplicationContext(), "Device disconnected", Toast.LENGTH_SHORT).show();
-        toggleConnectedIcon(false);
+        toggleConnected(false);
     }
 
     @Override
@@ -231,15 +235,30 @@ public class MainActivity extends AppCompatActivity implements OnBrokenPipeListe
             }
         });
 
-        if(BTinit())
-        {
-            BTconnect();
-        }
+        toggleConnected(false);
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(BTinit())
+                {
+                    BTconnect();
+                }
+            }
+        }, 100);
+
+
     }
 
-    private void toggleConnectedIcon(boolean show) {
+    private void toggleConnected(boolean show) {
         int state = show ? View.VISIBLE : View.INVISIBLE;
         bt_connected_icon.setVisibility(state);
+
+        forward_btn.setEnabled(show);
+        forward_left_btn.setEnabled(show);
+        forward_right_btn.setEnabled(show);
+        reverse_btn.setEnabled(show);
     }
 
     //Initializes bluetooth module
@@ -316,23 +335,25 @@ public class MainActivity extends AppCompatActivity implements OnBrokenPipeListe
             connected = false;
         }
 
-        toggleConnectedIcon(false);
+        toggleConnected(false);
 
         if(connected)
         {
             try
             {
                 outputStream = socket.getOutputStream(); //gets the output stream of the socket
-                toggleConnectedIcon(true);
+                toggleConnected(true);
+                touchBinderInstance.setOutputStream(outputStream);
             }
             catch(IOException e)
             {
                 e.printStackTrace();
             }
         } else {
+            Toast.makeText(getApplicationContext(),
+                    "Could not connect to bluetooth device", Toast.LENGTH_LONG).show();
         }
 
-        touchBinderInstance.setOutputStream(outputStream);
         return connected;
     }
 
