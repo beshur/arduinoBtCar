@@ -17,8 +17,9 @@ jobs:
         java-version: 1.8
     - name: Build with Gradle
       run: ./gradlew build
+    - run: cd app/build/outputs/apk; zip -r debug.zip debug; zip -r release.zip release;
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "app/build/outputs/apk"
+        artifacts: "app/build/outputs/apk/*.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: true
